@@ -40,3 +40,5 @@ next-env.d.ts
 e2e.db
 e2e.db-*
 tsconfig.tsbuildinfo
+.env*
+.family-secrets.txt
