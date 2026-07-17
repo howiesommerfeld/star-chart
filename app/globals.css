@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@theme {
+  /* Night-sky-but-joyful palette; kid signature colours come from DB values */
+  --color-night: #1e1b4b;
+  --color-night-soft: #312e81;
+  --color-star: #fbbf24;
+  --color-cloud: #eef2ff;
+}
+
+html,
+body {
+  height: 100%;
+  /* Kids tap fast and repeatedly — kill double-tap zoom */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body {
+  background: linear-gradient(180deg, var(--color-night) 0%, var(--color-night-soft) 100%);
+  min-height: 100dvh;
+  color: var(--color-cloud);
+  font-family: -apple-system, "SF Pro Rounded", system-ui, sans-serif;
+}

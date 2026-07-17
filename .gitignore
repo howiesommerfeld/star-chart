@@ -23,3 +23,19 @@ yarn-error.log*
 *.swp
 .idea/
 .vscode/
+.gstack/
+
+# Local database & backups
+local.db
+local.db-*
+backups/
+
+# Test artifacts
+test-results/
+playwright-report/
+
+# Next.js
+next-env.d.ts
+.vercel
+e2e.db
+e2e.db-*
