@@ -19,6 +19,56 @@ import type { DayView, KidState } from "@/lib/types";
 
 type TileFace = { value: number | null; state: "covered" | "chosen" | "rest" };
 
+/*
+ * A gold coin with the value stamped on it. `spin` gives the chosen coin a
+ * little celebratory wobble; `muted` greys the roads-not-taken.
+ */
+export function Coin({
+  value,
+  muted = false,
+  spin = false,
+}: {
+  value: number;
+  muted?: boolean;
+  spin?: boolean;
+}) {
+  const rim = muted ? "#475569" : "#b45309";
+  const face = muted ? "#64748b" : "#fbbf24";
+  const inner = muted ? "#94a3b8" : "#fcd34d";
+  const text = muted ? "#1e293b" : "#92400e";
+  return (
+    <motion.svg
+      viewBox="0 0 64 64"
+      className="h-[72%] w-[72%]"
+      animate={
+        spin
+          ? { rotateY: [0, 360], scale: [1, 1.15, 1] }
+          : undefined
+      }
+      transition={
+        spin ? { duration: 0.9, delay: 0.1, ease: "easeOut" } : undefined
+      }
+    >
+      <circle cx="32" cy="32" r="30" fill={rim} />
+      <circle cx="32" cy="32" r="26.5" fill={face} />
+      <circle cx="32" cy="32" r="21" fill={inner} />
+      {/* gloss */}
+      <ellipse cx="24" cy="20" rx="12" ry="7" fill="#ffffff" opacity={muted ? 0.15 : 0.35} />
+      <text
+        x="32"
+        y="33"
+        textAnchor="middle"
+        dominantBaseline="central"
+        fontSize={value >= 100 ? 20 : 24}
+        fontWeight="800"
+        fill={text}
+      >
+        {value}
+      </text>
+    </motion.svg>
+  );
+}
+
 export function TileBoard({
   token,
   kid,
@@ -187,12 +237,14 @@ function Tile({
   if (staticFace) {
     return (
       <div
-        className={`flex aspect-square items-center justify-center rounded-2xl text-xl font-extrabold ${
-          tile.state === "chosen" ? "text-white" : "bg-white/10 text-white/40"
+        className={`flex aspect-square items-center justify-center rounded-2xl ${
+          tile.state === "chosen" ? "" : "bg-white/10"
         }`}
         style={tile.state === "chosen" ? { backgroundColor: color } : undefined}
       >
-        {faceValue !== null ? `+${faceValue}` : ""}
+        {faceValue !== null && (
+          <Coin value={faceValue} muted={tile.state !== "chosen"} />
+        )}
       </div>
     );
   }
@@ -223,20 +275,26 @@ function Tile({
         >
           {dimmed ? "🌙" : "⭐"}
         </div>
-        {/* Face (value) */}
+        {/* Face (value on a coin) */}
         <div
-          className={`absolute inset-0 flex items-center justify-center rounded-2xl text-xl font-extrabold [backface-visibility:hidden] [transform:rotateY(180deg)] ${
+          className={`absolute inset-0 flex items-center justify-center rounded-2xl [backface-visibility:hidden] [transform:rotateY(180deg)] ${
             tile.state === "chosen"
-              ? "text-white"
+              ? ""
               : peekValue !== null
-                ? "bg-sky-400 text-night"
-                : "bg-white/10 text-white/40"
+                ? "bg-sky-400"
+                : "bg-white/10"
           }`}
           style={
             tile.state === "chosen" ? { backgroundColor: color } : undefined
           }
         >
-          {faceValue !== null ? `+${faceValue}` : ""}
+          {faceValue !== null && (
+            <Coin
+              value={faceValue}
+              muted={tile.state === "rest" && peekValue === null}
+              spin={tile.state === "chosen"}
+            />
+          )}
         </div>
       </motion.div>
     </button>

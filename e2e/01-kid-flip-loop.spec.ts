@@ -20,14 +20,15 @@ test("kid flip loop: avatar → journey → flip → banked", async ({ page }) =
 
   // Reveal: the whole board turns over; points chip updates
   await expect(page.getByTestId("board").locator("[data-covered='false']")).toHaveCount(16);
-  const points = await page.getByTestId("points").textContent();
+  // .last(): during the chip's crossfade two points spans coexist briefly
+  const points = await page.getByTestId("points").last().textContent();
   const banked = Number(points?.replace(/\D/g, ""));
   expect(banked).toBeGreaterThan(0);
 
   // Double-tap another tile: nothing changes (flip is spent, idempotent)
   await tiles.nth(9).click({ force: true });
   await page.waitForTimeout(400);
-  await expect(page.getByTestId("points")).toHaveText(points!);
+  await expect(page.getByTestId("points").last()).toHaveText(points!);
 
   // Journey reflects the played day with the points won
   await page.goBack();

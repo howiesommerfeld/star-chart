@@ -13,8 +13,8 @@ test("peek shows a value, re-covers, then flip works", async ({ page }) => {
   const tiles = page.getByTestId("board").locator("button");
   await tiles.nth(5).click();
 
-  // Peek face shows a value, then flips back within ~2s
-  await expect(tiles.nth(5)).toContainText(/\+\d+/);
+  // Peek face shows a coin value, then flips back within ~2s
+  await expect(tiles.nth(5)).toContainText(/\d+/);
   await expect(peekBtn).toBeHidden(); // 0 peeks left → control disappears
   await page.waitForTimeout(2300);
 

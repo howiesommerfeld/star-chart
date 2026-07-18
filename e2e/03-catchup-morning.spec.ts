@@ -20,10 +20,13 @@ test("three retro-confirmed days give three flips", async ({ page }) => {
     await expect(
       page.getByTestId("board").locator("[data-covered='false']"),
     ).toHaveCount(16);
-    const text = await page.getByTestId("points").textContent();
-    const points = Number(text?.replace(/\D/g, ""));
-    expect(points).toBeGreaterThan(total); // strictly grows each flip
-    total = points;
+    // .last() + poll: during the chip's crossfade two points spans coexist
+    const readPoints = async () =>
+      Number(
+        (await page.getByTestId("points").last().textContent())?.replace(/\D/g, ""),
+      );
+    await expect.poll(readPoints).toBeGreaterThan(total); // strictly grows each flip
+    total = await readPoints();
   }
 
   // Journey shows all three as played
