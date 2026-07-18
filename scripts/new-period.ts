@@ -15,17 +15,20 @@
  */
 import { randomBytes } from "node:crypto";
 import { eq } from "drizzle-orm";
+import {
+  loadLocalConfig,
+  applyDatabaseEnv,
+  X_DEFAULTS,
+  GRACE_DEFAULTS,
+  CHECKPOINT_DEFAULTS,
+} from "./config";
 import { getDb } from "../src/db/client";
 import { periods, kids, boards } from "../src/db/schema";
 import { generateBoard } from "../src/engine/board";
 
-const X_DEFAULTS: Record<number, number> = { 14: 12, 21: 18, 28: 24 };
-const GRACE_DEFAULTS: Record<number, number> = { 14: 2, 21: 3, 28: 4 };
-const CHECKPOINT_DEFAULTS: Record<number, number[]> = {
-  14: [5, 10],
-  21: [7, 14],
-  28: [9, 18],
-};
+// getDb() connects lazily on first call, so setting env here is early enough.
+const CONFIG = loadLocalConfig();
+applyDatabaseEnv(CONFIG);
 
 async function main() {
   const db = getDb();
@@ -39,9 +42,12 @@ async function main() {
     process.exit(1);
   }
 
-  const lengthDays = Number(process.env.SEED_LENGTH ?? active.lengthDays);
+  // Precedence: env > local file > carry forward from the closing period.
+  const lengthDays = Number(
+    process.env.SEED_LENGTH ?? CONFIG.period?.lengthDays ?? active.lengthDays,
+  );
   if (!X_DEFAULTS[lengthDays]) {
-    console.error(`SEED_LENGTH must be 14, 21 or 28 (got ${lengthDays})`);
+    console.error(`Period length must be 14, 21 or 28 (got ${lengthDays})`);
     process.exit(1);
   }
 
@@ -64,16 +70,22 @@ async function main() {
         lengthDays,
         timezone: active.timezone,
         wakeHour: active.wakeHour,
-        xRequired: X_DEFAULTS[lengthDays],
-        graceTokens: GRACE_DEFAULTS[lengthDays],
-        checkpointDays: CHECKPOINT_DEFAULTS[lengthDays],
+        xRequired: CONFIG.period?.xRequired ?? X_DEFAULTS[lengthDays],
+        graceTokens: CONFIG.period?.graceTokens ?? GRACE_DEFAULTS[lengthDays],
+        checkpointDays:
+          CONFIG.period?.checkpointDays ?? CHECKPOINT_DEFAULTS[lengthDays],
         gridW: active.gridW,
         gridH: active.gridH,
-        tileValues: active.tileValues, // config snapshot carries forward
-        checkpointBonusPoints: active.checkpointBonusPoints,
-        checkpointBonusPeeks: active.checkpointBonusPeeks,
-        peekCap: active.peekCap,
-        grandReward: process.env.SEED_GRAND_REWARD ?? active.grandReward,
+        tileValues: CONFIG.period?.tileValues ?? active.tileValues,
+        checkpointBonusPoints:
+          CONFIG.period?.checkpointBonusPoints ?? active.checkpointBonusPoints,
+        checkpointBonusPeeks:
+          CONFIG.period?.checkpointBonusPeeks ?? active.checkpointBonusPeeks,
+        peekCap: CONFIG.period?.peekCap ?? active.peekCap,
+        grandReward:
+          process.env.SEED_GRAND_REWARD ??
+          CONFIG.family?.grandReward ??
+          active.grandReward,
         seed,
         status: "active",
       })

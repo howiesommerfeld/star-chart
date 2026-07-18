@@ -1,0 +1,33 @@
+{
+  "$comment": "Copy to scripts/star-chart.local.json (gitignored) and edit. All scripts (db:seed, db:migrate, db:new-period) read it. Env vars override these values when set.",
+
+  "family": {
+    "kids": [
+      { "name": "Kid 1", "avatar": "🦄", "color": "#7c4dff" },
+      { "name": "Kid 2", "avatar": "🦖", "color": "#43a047" },
+      { "name": "Kid 3", "avatar": "🐣", "color": "#fb8c00" }
+    ],
+    "grandReward": "Trip to the zoo 🦁",
+    "timezone": "Africa/Johannesburg"
+  },
+
+  "period": {
+    "$comment": "Game tuning. startsOn null = tonight is night 1. xRequired/graceTokens/checkpointDays defaults scale for 14/21/28 if you leave them null.",
+    "startsOn": null,
+    "lengthDays": 21,
+    "wakeHour": 5,
+    "xRequired": 18,
+    "graceTokens": 3,
+    "checkpointDays": [7, 14],
+    "tileValues": [50, 20, 20, 20, 10, 10, 10, 10, 5, 5, 5, 5, 5, 5, 5, 5],
+    "checkpointBonusPoints": 20,
+    "checkpointBonusPeeks": 1,
+    "peekCap": 3
+  },
+
+  "database": {
+    "$comment": "Omit or leave url null for local dev (file:local.db). For production runs set both: url from `turso db show star-chart --url`, authToken from `turso db tokens create star-chart`.",
+    "url": null,
+    "authToken": null
+  }
+}

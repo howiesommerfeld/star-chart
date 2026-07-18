@@ -21,11 +21,19 @@ Motion · Vitest + Playwright. Everything interesting lives in:
 
 ```bash
 cp .env.example .env.local   # defaults work out of the box
+cp scripts/star-chart.local.example.json scripts/star-chart.local.json
+# edit it: kid names/avatars/colours, grand reward, period tuning, and (for
+# prod runs) the Turso url + authToken. GITIGNORED — real names never hit git.
 npm install
 npm run db:migrate           # creates file:local.db (+ pre-migration backup)
-npm run db:seed              # EDIT scripts/seed.ts first: kid names/avatars/colours
+npm run db:seed
 npm run dev                  # http://localhost:3000/f/dev  (PIN 1234)
 ```
+
+All three db scripts (`db:migrate`, `db:seed`, `db:new-period`) read
+`scripts/star-chart.local.json`; shell env vars (`TURSO_DATABASE_URL`,
+`TURSO_AUTH_TOKEN`, `SEED_*`) override it when set. Leave `database.url`
+null to target local dev; fill it in to target production.
 
 Tests: `npm test` (engine + db, 64 tests) · `npm run test:e2e` (6 Playwright
 flows against a frozen-clock fixture) · `npm run lint`.
@@ -35,8 +43,10 @@ flows against a frozen-clock fixture) · `npm run lint`.
 1. **Turso**: `turso db create star-chart` in the region nearest home
    (`turso db locations`), then `turso db show star-chart --url` and
    `turso db tokens create star-chart`.
-2. **Migrate + seed prod**:
-   `TURSO_DATABASE_URL=... TURSO_AUTH_TOKEN=... npm run db:migrate && ... npm run db:seed`
+2. **Migrate + seed prod**: fill in `database.url` + `database.authToken` in
+   `scripts/star-chart.local.json`, then `npm run db:migrate && npm run db:seed`.
+   (Set `database.url` back to null afterwards so casual script runs target
+   local dev, or leave it — the seed refuses to run twice anyway.)
 3. **Vercel**: import the GitHub repo. Set env vars: `TURSO_DATABASE_URL`,
    `TURSO_AUTH_TOKEN`, `FAMILY_TOKEN` (`openssl rand -hex 16`), `PARENT_PIN`,
    `SESSION_SECRET` (`openssl rand -hex 32`). Function region: nearest
@@ -51,9 +61,10 @@ flows against a frozen-clock fixture) · `npm run lint`.
   "Edit any past night".
 - **Day 22**: `npm run db:new-period` (optionally `SEED_GRAND_REWARD=...`,
   `SEED_LENGTH=14|21|28`). Points carry; grace and boards reset.
-- **Config changes** (tile economy, X, tokens): edit the next period's values
-  in `scripts/new-period.ts` env overrides or SQL on the `periods` row —
-  config is snapshotted per period and never changes mid-period.
+- **Config changes** (tile economy, X, tokens, reward): edit the `period` /
+  `family` sections of `scripts/star-chart.local.json` — they apply to the
+  NEXT `db:new-period` run. Config is snapshotted per period and never
+  changes mid-period.
 
 ## Rules the code enforces (from the design doc)
 

@@ -4,59 +4,68 @@
  * already exists (protects live family data from a fat-fingered re-run).
  *
  * Usage: npm run db:seed
- * Family details (kid names/avatars/colours, reward) live in
- * scripts/family.local.json — GITIGNORED so real names never hit the repo.
- * Copy scripts/family.local.example.json to start.
+ * ALL configuration (family details, period tuning, database credentials)
+ * lives in scripts/star-chart.local.json — GITIGNORED. Copy
+ * scripts/star-chart.local.example.json to start. Env vars override.
  */
 import { randomBytes } from "node:crypto";
-import { readFileSync } from "node:fs";
-import path from "node:path";
+import { eq } from "drizzle-orm";
+import {
+  loadLocalConfig,
+  applyDatabaseEnv,
+  X_DEFAULTS,
+  GRACE_DEFAULTS,
+  CHECKPOINT_DEFAULTS,
+} from "./config";
 import { getDb } from "../src/db/client";
 import { periods, kids, behaviours, boards } from "../src/db/schema";
 import { generateBoard } from "../src/engine/board";
-import { eq } from "drizzle-orm";
 
-interface FamilyConfig {
-  kids: { name: string; avatar: string; color: string }[];
-  grandReward: string;
-  timezone?: string;
-}
+// getDb() connects lazily on first call, so setting env here is early enough.
+const CONFIG = loadLocalConfig();
+applyDatabaseEnv(CONFIG);
 
-function loadFamily(): FamilyConfig {
-  const file = path.join(__dirname, "family.local.json");
-  try {
-    return JSON.parse(readFileSync(file, "utf8"));
-  } catch {
-    console.warn(
-      "⚠️  scripts/family.local.json not found — using placeholder kids.\n" +
-        "   Copy scripts/family.local.example.json to family.local.json and edit it.",
-    );
-    return JSON.parse(
-      readFileSync(path.join(__dirname, "family.local.example.json"), "utf8"),
-    );
-  }
-}
+const FALLBACK_KIDS = [
+  { name: "Kid 1", avatar: "🦄", color: "#7c4dff" },
+  { name: "Kid 2", avatar: "🦖", color: "#43a047" },
+  { name: "Kid 3", avatar: "🐣", color: "#fb8c00" },
+];
 
-const FAMILY = loadFamily();
-const KIDS = FAMILY.kids.map((k, i) => ({ ...k, sortOrder: i }));
+const KIDS = (CONFIG.family?.kids ?? FALLBACK_KIDS).map((k, i) => ({
+  ...k,
+  sortOrder: i,
+}));
+
+const p = CONFIG.period ?? {};
+const lengthDays = p.lengthDays ?? 21;
 
 const PERIOD = {
   number: 1,
-  startsOn: process.env.SEED_STARTS_ON ?? new Date().toISOString().slice(0, 10), // first NIGHT
-  lengthDays: 21,
-  timezone: process.env.SEED_TIMEZONE ?? FAMILY.timezone ?? "Africa/Johannesburg",
-  wakeHour: 5,
-  xRequired: 18, // 18-of-21 (design doc D2)
-  graceTokens: 3, // 1 per 7 days
-  checkpointDays: [7, 14],
+  startsOn:
+    process.env.SEED_STARTS_ON ??
+    p.startsOn ??
+    new Date().toISOString().slice(0, 10), // first NIGHT
+  lengthDays,
+  timezone:
+    process.env.SEED_TIMEZONE ??
+    CONFIG.family?.timezone ??
+    "Africa/Johannesburg",
+  wakeHour: p.wakeHour ?? 5,
+  xRequired: p.xRequired ?? X_DEFAULTS[lengthDays] ?? 18, // design doc D2
+  graceTokens: p.graceTokens ?? GRACE_DEFAULTS[lengthDays] ?? 3,
+  checkpointDays: p.checkpointDays ?? CHECKPOINT_DEFAULTS[lengthDays] ?? [7, 14],
   gridW: 4,
   gridH: 4,
   // One board's prize multiset: 1 jackpot, 3 high, 12 low (positions shuffle daily)
-  tileValues: [50, 20, 20, 20, 10, 10, 10, 10, 5, 5, 5, 5, 5, 5, 5, 5],
-  checkpointBonusPoints: 20,
-  checkpointBonusPeeks: 1,
-  peekCap: 3,
-  grandReward: process.env.SEED_GRAND_REWARD ?? FAMILY.grandReward,
+  tileValues:
+    p.tileValues ?? [50, 20, 20, 20, 10, 10, 10, 10, 5, 5, 5, 5, 5, 5, 5, 5],
+  checkpointBonusPoints: p.checkpointBonusPoints ?? 20,
+  checkpointBonusPeeks: p.checkpointBonusPeeks ?? 1,
+  peekCap: p.peekCap ?? 3,
+  grandReward:
+    process.env.SEED_GRAND_REWARD ??
+    CONFIG.family?.grandReward ??
+    "Trip to the zoo 🦁",
 };
 
 const BEHAVIOURS = [

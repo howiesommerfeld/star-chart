@@ -1,0 +1,9 @@
+{
+  "kids": [
+    { "name": "Jude", "avatar": "🦖", "color": "#7c4dff" },
+    { "name": "Ella", "avatar": "🦄", "color": "#43a047" },
+    { "name": "Nava", "avatar": "🐣", "color": "#fb8c00" }
+  ],
+  "grandReward": "Trip to the toy shop 🎁",
+  "timezone": "Africa/Johannesburg"
+}

@@ -2,13 +2,18 @@
  * Apply Drizzle migrations, taking a pre-migration backup first (eng plan /
  * codex D7: schema changes against live kid data always follow a dump).
  *
- * Dev:  npm run db:migrate                (file:local.db, dump to backups/)
- * Prod: TURSO_DATABASE_URL=... TURSO_AUTH_TOKEN=... npm run db:migrate
+ * Connection comes from scripts/star-chart.local.json (database section),
+ * overridable via TURSO_DATABASE_URL / TURSO_AUTH_TOKEN env vars; falls back
+ * to file:local.db for dev.
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { createClient } from "@libsql/client";
 import { migrate } from "drizzle-orm/libsql/migrator";
+import { loadLocalConfig, applyDatabaseEnv } from "./config";
 import { getDb } from "../src/db/client";
+
+// getDb() and rawClient() read env lazily, so setting it here is early enough.
+applyDatabaseEnv(loadLocalConfig());
 
 function rawClient() {
   return createClient({
