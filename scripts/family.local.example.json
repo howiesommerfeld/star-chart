@@ -1,0 +1,9 @@
+{
+  "kids": [
+    { "name": "Kid 1", "avatar": "🦄", "color": "#7c4dff" },
+    { "name": "Kid 2", "avatar": "🦖", "color": "#43a047" },
+    { "name": "Kid 3", "avatar": "🐣", "color": "#fb8c00" }
+  ],
+  "grandReward": "Trip to the zoo 🦁",
+  "timezone": "Africa/Johannesburg"
+}

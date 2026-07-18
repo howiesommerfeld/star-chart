@@ -42,3 +42,4 @@ e2e.db-*
 tsconfig.tsbuildinfo
 .env*
 .family-secrets.txt
+scripts/family.local.json
