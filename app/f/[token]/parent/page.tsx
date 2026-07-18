@@ -11,7 +11,17 @@ import {
   ApiError,
 } from "@/lib/clientApi";
 import { LoadingStars } from "@/components/ErrorBanner";
+import { KidAvatar } from "@/components/KidAvatar";
 import type { KidState } from "@/lib/types";
+
+/** Inline-sized avatar for text rows (image needs explicit dimensions). */
+function InlineAvatar({ avatar }: { avatar: string }) {
+  return (
+    <span className="inline-flex h-7 w-7 items-center justify-center overflow-hidden rounded-full align-middle">
+      <KidAvatar avatar={avatar} />
+    </span>
+  );
+}
 
 /*
  * Parent flow (design doc confirm flow):
@@ -158,7 +168,7 @@ function ConfirmPanel({
         return (
           <section key={kid.id}>
             <h2 className="mb-2 flex items-center gap-2 text-lg font-extrabold">
-              <span>{kid.avatar}</span> {kid.name}
+              <InlineAvatar avatar={kid.avatar} /> {kid.name}
               <span className="ml-auto text-xs font-semibold text-white/50">
                 🛟 {kid.graceLeft} left
               </span>
@@ -196,8 +206,8 @@ function ConfirmPanel({
         <div className="flex flex-col gap-4">
           {kids.map((kid) => (
             <div key={kid.id}>
-              <p className="mb-1 text-sm font-bold">
-                {kid.avatar} {kid.name}
+              <p className="mb-1 flex items-center gap-1.5 text-sm font-bold">
+                <InlineAvatar avatar={kid.avatar} /> {kid.name}
               </p>
               <div className="grid grid-cols-7 gap-1.5">
                 {Array.from({ length: Math.min(today, lengthDays) }, (_, i) => i + 1).map(
@@ -316,8 +326,11 @@ function ConfirmSheet({
         className="w-full rounded-t-3xl bg-night-soft p-6 pb-10"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="mb-4 text-lg font-extrabold">
-          {kid.avatar} {kid.name} — night {dayNo}
+        <h3 className="mb-4 flex items-center gap-2 text-lg font-extrabold">
+          <InlineAvatar avatar={kid.avatar} />
+          <span>
+            {kid.name} — night {dayNo}
+          </span>
         </h3>
         <p className="mb-3 font-semibold">
           Did {kid.name} sleep in their own bed?

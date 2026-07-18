@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAppState } from "@/lib/clientApi";
 import { ErrorBanner, LoadingStars } from "@/components/ErrorBanner";
 import { TileBoard } from "@/components/TileBoard";
+import { KidAvatar } from "@/components/KidAvatar";
 
 /* One day's board: live flip for playable days, as-played history otherwise. */
 export default function BoardPage({
@@ -52,10 +53,10 @@ export default function BoardPage({
           ←
         </Link>
         <span
-          className="flex h-11 w-11 items-center justify-center rounded-full text-2xl"
+          className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full text-2xl"
           style={{ backgroundColor: `${kid.color}33` }}
         >
-          {kid.avatar}
+          <KidAvatar avatar={kid.avatar} />
         </span>
         <span className="text-lg font-extrabold">Day {day.dayNo}</span>
         <AnimatePresence mode="popLayout">

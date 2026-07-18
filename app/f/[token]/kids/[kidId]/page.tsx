@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { useAppState } from "@/lib/clientApi";
 import { ErrorBanner, LoadingStars } from "@/components/ErrorBanner";
 import { Celebrations } from "@/components/Celebration";
+import { KidAvatar } from "@/components/KidAvatar";
 import type { DayView } from "@/lib/types";
 
 /*
@@ -42,10 +43,10 @@ export default function JourneyPage({
           ←
         </Link>
         <span
-          className="flex h-12 w-12 items-center justify-center rounded-full text-3xl"
+          className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full text-3xl"
           style={{ backgroundColor: `${kid.color}33` }}
         >
-          {kid.avatar}
+          <KidAvatar avatar={kid.avatar} />
         </span>
         <span className="text-2xl font-extrabold">{kid.name}</span>
         <span className="ml-auto rounded-2xl bg-white/10 px-3 py-1.5 font-bold">

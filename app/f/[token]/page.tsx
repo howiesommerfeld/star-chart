@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useAppState } from "@/lib/clientApi";
 import { ErrorBanner, LoadingStars } from "@/components/ErrorBanner";
+import { KidAvatar } from "@/components/KidAvatar";
 
 /* Entry screen: tap your face. No reading required. */
 export default function EntryPage({
@@ -42,10 +43,10 @@ export default function EntryPage({
                 style={{ boxShadow: `inset 0 0 0 3px ${kid.color}` }}
               >
                 <span
-                  className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full text-5xl"
+                  className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full text-5xl"
                   style={{ backgroundColor: `${kid.color}33` }}
                 >
-                  {kid.avatar}
+                  <KidAvatar avatar={kid.avatar} />
                 </span>
                 <span className="flex flex-col">
                   <span className="text-2xl font-extrabold">{kid.name}</span>
